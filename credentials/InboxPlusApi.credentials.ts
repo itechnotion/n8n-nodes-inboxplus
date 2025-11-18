@@ -1,4 +1,4 @@
-import type { ICredentialType, INodeProperties } from 'n8n-workflow';
+import type { ICredentialType, INodeProperties, Icon } from 'n8n-workflow';
 
 export class InboxPlusApi implements ICredentialType {
 	name = 'inboxPlusApi';
@@ -7,8 +7,8 @@ export class InboxPlusApi implements ICredentialType {
 
 	icon = {
 		light: 'file:logo.svg',
-		dark: 'file:logo.svg',
-	};
+		dark: 'file:logo.dark.svg',
+	} as Icon;
 
 	// Required by n8n cloud ESLint
 	test = {
