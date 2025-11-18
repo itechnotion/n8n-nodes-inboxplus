@@ -1,0 +1,43 @@
+{
+  "name": "InboxPlus - create contact + send email",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "contact",
+        "operation": "create",
+        "contactEmail": "lead@example.com",
+        "contactData": { "firstName": "John", "lastName": "Doe" }
+      },
+      "name": "Create Contact (InboxPlus)",
+      "type": "inboxPlus",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "resource": "email",
+        "operation": "send",
+        "to": "lead@example.com",
+        "subject": "Test from n8n",
+        "body": "Hello from InboxPlus node"
+      },
+      "name": "Send Email (InboxPlus)",
+      "type": "inboxPlus",
+      "typeVersion": 1,
+      "position": [450, 300]
+    }
+  ],
+  "connections": {
+    "Create Contact (InboxPlus)": {
+      "main": [
+        [
+          {
+            "node": "Send Email (InboxPlus)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}
