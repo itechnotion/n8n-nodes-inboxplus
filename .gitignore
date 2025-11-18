@@ -7,3 +7,10 @@ dist/
 .DS_Store
 npm-debug.log*
 pnpm-lock.yaml
+dist/
+*.ico
+*.log
+node_modules/
+.DS_Store
+.github/
+examples/
