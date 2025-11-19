@@ -5,12 +5,11 @@ import type {
 	INodeTypeDescription,
 	ILoadOptionsFunctions,
 	INodePropertyOptions,
-	IDataObject,
 } from 'n8n-workflow';
 
 import { NodeOperationError } from 'n8n-workflow';
 
-/** ------------------ UUID Generator (NO crypto import) ------------------ */
+/** ------------------ UUID Generator ------------------ */
 function generateUUID(): string {
 	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
 		const r = (Math.random() * 16) | 0;
@@ -19,12 +18,21 @@ function generateUUID(): string {
 	});
 }
 
-/** ------------------ API Response Interfaces ------------------ */
+/** Escape HTML so backend JSON parser will not fail */
+function escapeHtmlForJson(input: string): string {
+	return input
+		.replace(/\\/g, '\\\\')
+		.replace(/"/g, '\\"')
+		.replace(/\n/g, '\\n')
+		.replace(/\r/g, '\\r');
+}
+
 interface InboxPlusTemplate {
 	id?: string;
 	_id?: string;
 	template_name?: string;
 	subject?: string;
+	body?: string;
 }
 
 interface InboxPlusSequence {
@@ -33,11 +41,14 @@ interface InboxPlusSequence {
 	sequence_name?: string;
 }
 
-export class InboxPlus implements INodeType {
+interface InboxPlusUser {
+	email: string;
+	full_name: string;
+}
 
-	/** ---------------------------------------------------------
-	 *             NODE DESCRIPTION  
-	 * --------------------------------------------------------- */
+
+/** ------------------ NODE DEFINITION ------------------ */
+export class InboxPlus implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'InboxPlus',
 		name: 'inboxPlus',
@@ -47,14 +58,11 @@ export class InboxPlus implements INodeType {
 			light: 'file:logo.svg',
 			dark: 'file:logo.dark.svg',
 		},
-
 		subtitle: '={{$parameter["operation"]}}',
-		description: 'Complete InboxPlus workflow in one step',
-
+		description: 'Send first template email and auto start sequence using InboxPlus',
 		defaults: {
 			name: 'InboxPlus',
 		},
-
 		usableAsTool: true,
 		inputs: ['main'],
 		outputs: ['main'],
@@ -68,7 +76,6 @@ export class InboxPlus implements INodeType {
 		],
 
 		properties: [
-			/** --- Operation --- */
 			{
 				displayName: 'Operation',
 				name: 'operation',
@@ -79,86 +86,86 @@ export class InboxPlus implements INodeType {
 					{
 						name: 'Start InboxPlus Workflow',
 						value: 'startWorkflow',
-						action: 'Start workflow',
-						description: 'Generate tracking ID → Send Template → Trigger Sequence',
+						action: 'Send first template email and auto start sequence',
+						description: 'Loads selected template, sends first email, and starts sequence',
 					},
 				],
 			},
 
-			/** --- Template Dropdown --- */
+			{
+				displayName: 'Recipient Email',
+				name: 'recipientEmail',
+				type: 'string',
+				default: '',
+				required: true,
+				displayOptions: { show: { operation: ['startWorkflow'] } },
+				description: 'Email address of the contact',
+			},
+
 			{
 				displayName: 'Template Name or ID',
 				name: 'templateId',
 				type: 'options',
+				typeOptions: { loadOptionsMethod: 'getTemplates' },
+				displayOptions: { show: { operation: ['startWorkflow'] } },
 				default: '',
-				typeOptions: {
-					loadOptionsMethod: 'getTemplates',
-				},
-				displayOptions: {
-					show: { operation: ['startWorkflow'] },
-				},
 				description:
 					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 			},
 
-			/** --- Sequence Dropdown --- */
 			{
 				displayName: 'Sequence Name or ID',
 				name: 'sequenceId',
 				type: 'options',
+				typeOptions: { loadOptionsMethod: 'getSequences' },
+				displayOptions: { show: { operation: ['startWorkflow'] } },
 				default: '',
-				typeOptions: {
-					loadOptionsMethod: 'getSequences',
-				},
-				displayOptions: {
-					show: { operation: ['startWorkflow'] },
-				},
 				description:
 					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code/expressions/">expression</a>',
 			},
 		],
 	};
 
-	/** ---------------------------------------------------------
-	 *             METHODS (OUTSIDE DESCRIPTION)
-	 * --------------------------------------------------------- */
+	/** ------------------ loadOptions ------------------ */
 	methods = {
-
 		loadOptions: {
-
-			/** ---- Load Templates ---- */
+			// Load templates
 			async getTemplates(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const apiKey = (await this.getCredentials('inboxPlusApi')).apiKey as string;
+				const creds = await this.getCredentials('inboxPlusApi');
+				const apiKey = (creds?.apiKey as string) ?? '';
+				if (!apiKey) return [];
 
 				const resp = await this.helpers.httpRequest({
 					method: 'POST',
 					baseURL: 'https://dev-api.inboxpl.us',
 					url: '/user-emails/n8n/get-email-templates',
 					headers: { api_key: apiKey },
+					json: true,
 				});
 
 				const list = (resp?.templates || []) as InboxPlusTemplate[];
 
 				return list.map((t) => ({
-					name: t.template_name || t.subject || 'Untitled',
+					name: t.template_name || t.subject || 'Untitled Template',
 					value: t.id || t._id || '',
 				}));
 			},
 
-			/** ---- Load Sequences ---- */
+			// Load sequences
 			async getSequences(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const apiKey = (await this.getCredentials('inboxPlusApi')).apiKey as string;
+				const creds = await this.getCredentials('inboxPlusApi');
+				const apiKey = (creds?.apiKey as string) ?? '';
+				if (!apiKey) return [];
 
 				const resp = await this.helpers.httpRequest({
 					method: 'POST',
 					baseURL: 'https://dev-api.inboxpl.us',
 					url: '/user-emails/n8n/get-sequences',
 					headers: { api_key: apiKey },
+					json: true,
 				});
 
-				const list = (resp?.sequences || []) as InboxPlusSequence[];
-
-				return list.map((s) => ({
+				return (resp?.sequences || []).map((s: InboxPlusSequence) => ({
 					name: s.sequence_name || 'Untitled Sequence',
 					value: s.id || s._id || '',
 				}));
@@ -166,11 +173,12 @@ export class InboxPlus implements INodeType {
 		},
 	};
 
-	/** ---------------------------------------------------------
-	 *                    Credential Test
-	 * --------------------------------------------------------- */
-	async ping(this: IExecuteFunctions) {
-		const apiKey = (await this.getCredentials('inboxPlusApi')).apiKey as string;
+	/** ------------------ Credential test ------------------ */
+	async ping(this: IExecuteFunctions): Promise<void> {
+		const creds = await this.getCredentials('inboxPlusApi');
+		const apiKey = (creds?.apiKey as string) ?? '';
+
+		if (!apiKey) throw new NodeOperationError(this.getNode(), 'API Key missing');
 
 		try {
 			await this.helpers.httpRequest({
@@ -178,111 +186,129 @@ export class InboxPlus implements INodeType {
 				baseURL: 'https://dev-api.inboxpl.us',
 				url: '/user-emails/n8n/get-email-templates',
 				headers: { api_key: apiKey },
+				json: true,
 			});
 		} catch {
 			throw new NodeOperationError(this.getNode(), 'Invalid API Key');
 		}
 	}
 
-	/** ---------------------------------------------------------
-	 *                       EXECUTION
-	 * --------------------------------------------------------- */
+	/** ------------------ EXECUTE MAIN LOGIC ------------------ */
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const items = this.getInputData();
-		const output: INodeExecutionData[] = [];
+		const creds = await this.getCredentials('inboxPlusApi');
+		const apiKey = (creds?.apiKey as string) ?? '';
+		if (!apiKey) throw new NodeOperationError(this.getNode(), 'API Key missing');
 
-		const apiKey = (await this.getCredentials('inboxPlusApi')).apiKey as string;
-		const base = 'https://dev-api.inboxpl.us/user-emails/n8n';
+		const operation = this.getNodeParameter('operation', 0) as string;
+		if (operation !== 'startWorkflow')
+			throw new NodeOperationError(this.getNode(), 'Operation not implemented');
 
-		const json = items[0].json as IDataObject;
-
-		/** ------------------ Extract Email ------------------ */
-		let contactEmail =
-			(json.email as string) ||
-			(json.to as string) ||
-			(json.recipient as string) ||
-			(json.toEmail as string) ||
-			(json.To as string) ||
-			(json.From as string) ||
-			(json.from as string);
-
-		// Gmail fallback
-		if (!contactEmail && json.payload && typeof json.payload === 'object') {
-			const headers = (json.payload as IDataObject).headers;
-			if (Array.isArray(headers)) {
-				const h = headers.find(
-					(h: IDataObject) => h.name === 'To' && typeof h.value === 'string',
-				);
-				if (h?.value) contactEmail = h.value as string;
-			}
-		}
-
-		if (!contactEmail) {
-			throw new NodeOperationError(
-				this.getNode(),
-				'Email not found in input. Connect Gmail node → InboxPlus node',
-			);
-		}
-
-		/** ------------------ Generate Tracking ID ------------------ */
-		const trackingId = generateUUID();
-		const trackingImage = `${base}/tracking-image/${trackingId}`;
-
-		/** ------------------ Node Parameters ------------------ */
+		/** 1. Read input */
+		const recipientEmail = this.getNodeParameter('recipientEmail', 0) as string;
 		const templateId = this.getNodeParameter('templateId', 0) as string;
 		const sequenceId = this.getNodeParameter('sequenceId', 0) as string;
 
-		/** ------------------ Send Template Email ------------------ */
+		/** 2. Fetch templates */
+		const templateResp = await this.helpers.httpRequest({
+			method: 'POST',
+			baseURL: 'https://dev-api.inboxpl.us',
+			url: '/user-emails/n8n/get-email-templates',
+			headers: { api_key: apiKey },
+			json: true,
+		});
+
+		const templates = templateResp?.templates || [];
+		const template = templates.find((t: InboxPlusTemplate) => t.id === templateId || t._id === templateId);
+
+		if (!template) {
+			throw new NodeOperationError(this.getNode(), `Template not found for ID: ${templateId}`);
+		}
+
+		const subject = template.subject || 'No Subject';
+		const rawBody = template.body || '';
+
+		/** 3. HTML escape */
+		const safeBody = escapeHtmlForJson(rawBody);
+
+		/** 4. Generate thread + message ID */
+		const threadId = generateUUID();
+		const messageId = generateUUID();
+
+		/** 5. Generate tracking ID */
+		const trackingResp = await this.helpers.httpRequest({
+			method: 'POST',
+			baseURL: 'https://dev-api.inboxpl.us',
+			url: '/user-emails/n8n/tracking-id',
+			headers: { api_key: apiKey },
+			json: true,
+		});
+
+		const trackingId = trackingResp.trackingId;
+
+		let trackingImage = '';
+		if (trackingResp.trackingImage) {
+			const match = trackingResp.trackingImage.match(/src="([^"]+)"/);
+			if (match) trackingImage = match[1];
+		}
+
+		/** 6. Fetch sender email from org */
+		const senderResp = await this.helpers.httpRequest({
+			method: 'GET',
+			baseURL: 'https://dev-api.inboxpl.us',
+			url: '/auth/organization/users',
+			headers: { api_key: apiKey },
+			json: true,
+		});
+
+		const sender: InboxPlusUser | undefined = senderResp?.users?.[0];
+		const senderEmail = sender?.email || 'unknown@sender';
+
+		/** 7. Build final payload */
+		const payload = {
+			recipient_email: recipientEmail,
+			subject,
+			body: safeBody,
+			threadId,
+			message_id: messageId,
+			tracking_id: trackingId,
+			tracking_image: trackingImage,
+			sender_email: senderEmail,
+			sequenceId,
+		};
+
+		/** 8. Validate JSON */
+		JSON.stringify(payload); // will throw on invalid JSON
+
+		/** 9. Send email */
 		const sendResp = await this.helpers.httpRequest({
 			method: 'POST',
-			baseURL: base,
-			url: '/',
-			headers: { api_key: apiKey, 'Content-Type': 'application/json' },
-			body: {
-				recipient_email: contactEmail,
-				subject: json.Subject,
-				threadId: json.threadId || json.threadID || json.thread_id,
-				message_id: json.id,
-				sender_email: json.From || json.from,
-				tracking_id: trackingId,
-				sequenceId,
+			baseURL: 'https://dev-api.inboxpl.us',
+			url: '/user-emails/n8n',
+			headers: {
+				api_key: apiKey,
+				'Content-Type': 'application/json',
 			},
+			body: payload,
 			json: true,
 		});
 
-		/** ------------------ Trigger Sequence ------------------ */
-		const seqResp = await this.helpers.httpRequest({
-			method: 'POST',
-			baseURL: base,
-			url: '/',
-			headers: { api_key: apiKey, 'Content-Type': 'application/json' },
-			body: {
-				recipient_email: contactEmail,
-				subject: json.Subject,
-				threadId: json.threadId || json.threadID || json.thread_id,
-				message_id: json.id,
-				sender_email: json.From || json.from,
-				tracking_id: trackingId,
-				sequenceId: sequenceId 
-			},
-			json: true,
-		});
-
-
-		/** ------------------ Final Output ------------------ */
-		output.push({
+		/** 10. Return output */
+		const output: INodeExecutionData = {
 			json: {
-				success: true,
-				contactEmail,
-				trackingId,
-				trackingImage,
+				success: sendResp?.success === 1,
+				apiResponse: sendResp,
+				recipientEmail,
 				templateId,
 				sequenceId,
-				templateSent: sendResp,
-				sequenceTriggered: seqResp,
+				threadId,
+				message_id: messageId,
+				trackingId,
+				trackingImage,
+				sender_email: senderEmail,
+				safeBody,
 			},
-		});
+		};
 
-		return [output];
+		return [[output]];
 	}
 }

@@ -8,6 +8,7 @@ export class InboxPlusApi implements ICredentialType {
 	name = 'inboxPlusApi';
 	displayName = 'InboxPlus API';
 	documentationUrl = 'https://github.com/itechnotion-jay/n8n-nodes-inboxplus';
+	description = 'API key for authenticating with InboxPlus';
 
 	icon = {
 		light: 'file:logo.svg',
