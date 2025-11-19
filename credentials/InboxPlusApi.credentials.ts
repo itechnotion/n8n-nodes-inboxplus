@@ -1,20 +1,27 @@
-import type { ICredentialType, INodeProperties, Icon } from 'n8n-workflow';
+import type {
+	ICredentialType,
+	INodeProperties,
+	ICredentialTestRequest,
+} from 'n8n-workflow';
 
 export class InboxPlusApi implements ICredentialType {
 	name = 'inboxPlusApi';
 	displayName = 'InboxPlus API';
-	documentationUrl = 'https://docs.n8n.io/credentials/inboxplus/';
+	documentationUrl = 'https://github.com/itechnotion-jay/n8n-nodes-inboxplus';
 
 	icon = {
 		light: 'file:logo.svg',
 		dark: 'file:logo.dark.svg',
-	} as Icon;
+	} as const;
 
-	// Required by n8n cloud ESLint
-	test = {
+	test: ICredentialTestRequest = {
 		request: {
-			method: 'GET' as const,
-			url: 'https://api.inboxpl.us/ping',
+			method: 'POST',
+			baseURL: 'https://dev-api.inboxpl.us',
+			url: '/user-emails/n8n/get-email-templates',
+			headers: {
+				api_key: '={{$credentials.apiKey}}',
+			},
 		},
 	};
 
@@ -23,9 +30,11 @@ export class InboxPlusApi implements ICredentialType {
 			displayName: 'API Key',
 			name: 'apiKey',
 			type: 'string',
-			typeOptions: { password: true },
 			default: '',
 			required: true,
+			typeOptions: {
+				password: true,
+			},
 		},
 	];
 }

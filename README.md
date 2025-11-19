@@ -1,46 +1,195 @@
 # n8n-nodes-inboxplus
 
-This is an n8n community node. It lets you use _app/service name_ in your n8n workflows.
+A custom **InboxPlus Integration Node for n8n** that allows you to:
 
-_App/service name_ is _one or two sentences describing the service this node integrates with_.
+* Fetch InboxPlus **email templates**
+* Fetch InboxPlus **sequences**
+* Generate **tracking IDs**
+* Send emails via InboxPlus API
+* Trigger sequences — all in a **single unified node**
 
-[n8n](https://n8n.io/) is a [fair-code licensed](https://docs.n8n.io/sustainable-use-license/) workflow automation platform.
+This node is created and maintained by **Jay Gemawat**.
 
-[Installation](#installation)
-[Operations](#operations)
-[Credentials](#credentials)
-[Compatibility](#compatibility)
-[Usage](#usage)
-[Resources](#resources)
-[Version history](#version-history)
+---
 
-## Installation
+## ✨ Features
 
-Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes/installation/) in the n8n community nodes documentation.
+✔️ Load templates dynamically
+✔️ Load sequences dynamically
+✔️ Generate local tracking ID
+✔️ Send email using InboxPlus API
+✔️ Trigger sequences
+✔️ Works with **Gmail → InboxPlus** automation
+✔️ Fully compatible with `n8n-node-dev` and community guidelines
 
-## Operations
+---
 
-_List the operations supported by your node._
+## 📦 Installation
 
-## Credentials
+### **1. Clone this repository**
 
-_If users need to authenticate with the app/service, provide details here. You should include prerequisites (such as signing up with the service), available authentication methods, and how to set them up._
+```
+git clone https://github.com/itechnotion-jay/n8n-nodes-inboxplus.git
+cd n8n-nodes-inboxplus
+```
 
-## Compatibility
+### **2. Install dependencies**
 
-_State the minimum n8n version, as well as which versions you test against. You can also include any known version incompatibility issues._
+```
+pnpm install
+```
 
-## Usage
+### **3. Build the node**
 
-_This is an optional section. Use it to help users with any difficult or confusing aspects of the node._
+```
+pnpm build
+```
 
-_By the time users are looking for community nodes, they probably already know n8n basics. But if you expect new users, you can link to the [Try it out](https://docs.n8n.io/try-it-out/) documentation to help them get started._
+### **4. Link the node to your local n8n**
 
-## Resources
+```
+pnpm link --global
+n8n-node-dev link
+```
 
-* [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-* _Link to app/service documentation._
+Or manually copy the `/dist` folder into your n8n custom nodes directory.
 
-## Version history
+---
 
-_This is another optional section. If your node has multiple versions, include a short description of available versions and what changed, as well as any compatibility impact._
+## 🧩 Usage
+
+### **1. Add Credentials**
+
+Go to:
+**n8n → Credentials → InboxPlus API**
+
+Enter:
+
+| Field       | Description                    |
+| ----------- | ------------------------------ |
+| **API Key** | Your InboxPlus account API key |
+
+---
+
+## 🧰 Node Parameters
+
+### **Operation**
+
+* Start InboxPlus Workflow
+
+### **Template Name or ID**
+
+* Auto-loaded from InboxPlus API
+* Or specify manually via expression:
+  `={{ "template-id-here" }}`
+
+### **Sequence Name or ID**
+
+* Auto-loaded from InboxPlus API
+
+### **Template Variables**
+
+(Optional) — JSON object such as:
+
+```json
+{
+  "name": "Jay",
+  "city": "Valsad"
+}
+```
+
+---
+
+## 📡 API Endpoints (used internally)
+
+### **Load Templates**
+
+```
+POST https://api/for/fetching/template
+```
+
+### **Load Sequences**
+
+```
+POST https://api/for/fetching/sequences
+```
+
+### **Send Email / Trigger Sequence**
+
+```
+POST https://api/for/starting/sequences
+```
+
+---
+
+## 📘 Example Workflow
+
+**Gmail Trigger → InboxPlus Node → CRM**
+
+When a new email is received:
+
+* Extracts sender email
+* Generates tracking ID
+* Sends InboxPlus template
+* Triggers sequence
+* Returns tracking data (ID + image URL)
+
+Output:
+
+```json
+{
+  "success": true,
+  "contactEmail": "example@gmail.com",
+  "trackingId": "abc123-xyz",
+  "trackingImage": "https://base-url/.../tracking-image/abc123",
+  "templateSent": {
+    "code": 200,
+    "success": 1
+  },
+  "sequenceTriggered": {
+    "code": 200,
+    "success": 1
+  }
+}
+```
+
+---
+
+## 🛠 Development
+
+Watch mode:
+
+```
+pnpm dev
+```
+
+Lint:
+
+```
+pnpm lint
+pnpm lint:fix
+```
+
+Release:
+
+```
+pnpm release
+```
+
+---
+
+## 🔐 Environment Variables
+
+None required — API Key is stored inside n8n Credentials.
+
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome!
+
+---
+
+
+---
+
