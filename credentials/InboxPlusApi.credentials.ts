@@ -8,34 +8,29 @@ export class InboxPlusApi implements ICredentialType {
 	name = 'inboxPlusApi';
 	displayName = 'InboxPlus API';
 	documentationUrl = 'https://github.com/itechnotion-jay/n8n-nodes-inboxplus';
-	description = 'API key for authenticating with InboxPlus';
 
-	icon = {
-		light: 'file:logo.svg',
-		dark: 'file:logo.dark.svg',
-	} as const;
+	icon = 'file:logo.svg' as const;
 
 	test: ICredentialTestRequest = {
 		request: {
-			method: 'POST',
+			method: 'GET',
 			baseURL: 'https://dev-api.inboxpl.us',
-			url: '/user-emails/n8n/get-email-templates',
+			url: '/auth/get-user-info',
 			headers: {
 				api_key: '={{$credentials.apiKey}}',
 			},
+			json: true,
 		},
 	};
 
 	properties: INodeProperties[] = [
 		{
-			displayName: 'API Key',
+			displayName: 'InboxPlus API Key',
 			name: 'apiKey',
 			type: 'string',
 			default: '',
 			required: true,
-			typeOptions: {
-				password: true,
-			},
+			typeOptions: { password: true },
 		},
 	];
 }
