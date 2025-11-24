@@ -1,7 +1,7 @@
 {
   "name": "n8n-nodes-inboxplus",
-  "version": "0.1.0",
-  "description": "InboxPlus integration for n8n - prepare email + start sequences",
+  "version": "0.2.0",
+  "description": "InboxPlus integration for n8n - unified node for sending emails and managing sequences",
   "license": "MIT",
   "type": "commonjs",
   "author": {
@@ -44,8 +44,7 @@
       "dist/credentials/InboxPlusApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/InboxPlus/InboxPlusPrepareEmail.node.js",
-      "dist/nodes/InboxPlus/InboxPlusStartSequence.node.js"
+      "dist/nodes/InboxPlus/InboxPlus.node.js"
     ]
   },
   "devDependencies": {

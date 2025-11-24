@@ -13,9 +13,9 @@ export class InboxPlusApi implements ICredentialType {
 
 	test: ICredentialTestRequest = {
 		request: {
-			method: 'GET',
+			method: 'POST',
 			baseURL: 'https://dev-api.inboxpl.us',
-			url: '/auth/get-user-info',
+			url: '/user-emails/n8n/get-email-templates',
 			headers: {
 				api_key: '={{$credentials.apiKey}}',
 			},

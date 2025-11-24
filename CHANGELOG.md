@@ -2,36 +2,48 @@
 
 All notable changes to this project will be documented in this file.
 
-## [0.1.1] - 2025-11-20
-### Added
-- Auto-fetch of email template body & subject from API.
-- Added automatic thread ID and message ID generation.
-- Added automatic tracking ID + tracking image generation using `/tracking-id`.
-- Added debug-safe sanitization for HTML body (`safeBody`).
-- Added sender email placeholder for upcoming org-user lookup.
-- Improved error handling and safer fallback values.
-- Added strict ESLint/TypeScript compatibility and cleanup.
-- Updated dynamic dropdown descriptions to match n8n guidelines.
-- Enhanced payload formatting for backend compatibility.
+## [0.2.0] - 2024-01-XX
 
-### Changed
-- Rebuilt workflow: send template email, attach tracking, and trigger sequence with proper payload.
-- Refactored UUID generation and request helper logic.
-- Improved credential ping validation.
-- Cleaned node metadata (action sentence-case, noDataExpression, corrected display names).
+### 🎉 Major Refactor - Unified Node
 
-### Fixed
-- Fixed issues with template & sequence load options.
-- Fixed tracking image extraction from HTML.
-- Fixed 403 responses caused by incorrect or missing payload fields.
+#### Added
+- **New unified InboxPlus node** with operation selector (like Gmail node)
+- **Automatic sender email detection** - Fetches from InboxPlus API `/auth/get-user-info`
+- Two operations:
+  - **Send Email** - Send emails using InboxPlus templates
+  - **Start Sequence** - Start automated follow-up sequences
+- Integrated tracking ID generation into Send Email operation
+- Better error messages and validation
+
+#### Changed
+- Consolidated 3 separate nodes into 1 unified node
+- Simplified workflow design (2 nodes instead of 3-4)
+- Removed dependency on Gmail node for sending
+- Updated package.json to register only the new unified node
+
+#### Deprecated
+- `InboxPlusPrepareEmail` node (functionality merged into Send Email operation)
+- `InboxPlusSendEmail` node (replaced by Send Email operation)
+- `InboxPlusStartSequence` node (replaced by Start Sequence operation)
+
+#### Fixed
+- **Sequence not starting** - Fixed API payload structure for starting sequences
+- **Missing sender email** - Now automatically fetched from user account
+- **Complex workflow** - Reduced from 3-4 nodes to 2 nodes
+
+#### Technical Details
+- Sender email is fetched via `POST /auth/get-user-info` API
+- Tracking ID generation integrated into Send Email operation
+- Thread ID and Message ID are generated as UUIDs
+- All metadata properly passed between operations
 
 ---
 
-## [0.1.0] - 2025-11-19
+## [0.1.0] - Initial Release
+
 ### Added
-- Initial release of InboxPlus n8n node.
-- Credential support (InboxPlus API).
-- Dynamic Template & Sequence dropdowns.
-- Tracking ID auto-generation.
-- Combined workflow: Send template + Trigger sequence.
-- Full TypeScript rewrite and code cleanup.
+- InboxPlus Prepare Email node
+- InboxPlus Send Email node
+- InboxPlus Start Sequence node
+- InboxPlus API credentials
+- Template and sequence loading from API

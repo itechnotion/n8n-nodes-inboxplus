@@ -1,195 +1,173 @@
 # n8n-nodes-inboxplus
 
-A custom **InboxPlus Integration Node for n8n** that allows you to:
+InboxPlus integration for n8n - Send emails with templates and automate follow-up sequences.
 
-* Fetch InboxPlus **email templates**
-* Fetch InboxPlus **sequences**
-* Generate **tracking IDs**
-* Send emails via InboxPlus API
-* Trigger sequences — all in a **single unified node**
+## Features
 
-This node is created and maintained by **Jay Gemawat**.
+- ✅ Load email templates from InboxPlus
+- ✅ Generate tracking pixels for email analytics
+- ✅ Send emails via Gmail with InboxPlus templates
+- ✅ Start automated follow-up sequences
+- ✅ Track email opens and replies
+- ✅ Automatic follow-up management
 
----
+## Installation
 
-## ✨ Features
-
-✔️ Load templates dynamically
-✔️ Load sequences dynamically
-✔️ Generate local tracking ID
-✔️ Send email using InboxPlus API
-✔️ Trigger sequences
-✔️ Works with **Gmail → InboxPlus** automation
-✔️ Fully compatible with `n8n-node-dev` and community guidelines
-
----
-
-## 📦 Installation
-
-### **1. Clone this repository**
-
-```
-git clone https://github.com/itechnotion-jay/n8n-nodes-inboxplus.git
+```bash
 cd n8n-nodes-inboxplus
-```
-
-### **2. Install dependencies**
-
-```
 pnpm install
-```
-
-### **3. Build the node**
-
-```
 pnpm build
-```
-
-### **4. Link the node to your local n8n**
-
-```
 pnpm link --global
-n8n-node-dev link
 ```
 
-Or manually copy the `/dist` folder into your n8n custom nodes directory.
+Then restart your n8n instance or link in your n8n custom nodes directory.
 
----
+## Credentials
 
-## 🧩 Usage
+You need an InboxPlus API key (JWT token) from your InboxPlus account.
 
-### **1. Add Credentials**
+1. Go to InboxPlus Dashboard → Settings → API
+2. Copy your API key
+3. In n8n: Credentials → Add → InboxPlus API
+4. Paste your API key
 
-Go to:
-**n8n → Credentials → InboxPlus API**
+## Operations
 
-Enter:
+### 1. Prepare Email
 
-| Field       | Description                    |
-| ----------- | ------------------------------ |
-| **API Key** | Your InboxPlus account API key |
+Loads an InboxPlus template and generates tracking.
 
----
+**Parameters:**
+- Recipient Email
+- Template (dropdown - loads from your InboxPlus account)
 
-## 🧰 Node Parameters
-
-### **Operation**
-
-* Start InboxPlus Workflow
-
-### **Template Name or ID**
-
-* Auto-loaded from InboxPlus API
-* Or specify manually via expression:
-  `={{ "template-id-here" }}`
-
-### **Sequence Name or ID**
-
-* Auto-loaded from InboxPlus API
-
-### **Template Variables**
-
-(Optional) — JSON object such as:
-
+**Output:**
 ```json
 {
-  "name": "Jay",
-  "city": "Valsad"
+  "recipientEmail": "contact@example.com",
+  "subject": "Email Subject",
+  "body": "<div>Email content</div>",
+  "gmailBodyHtml": "<div>Email content</div><br><img tracking />",
+  "trackingId": "uuid"
 }
 ```
 
----
+### 2. Start Sequence
 
-## 📡 API Endpoints (used internally)
+Records the sent email in InboxPlus and starts automated follow-up sequence.
 
-### **Load Templates**
+**Parameters:**
+- Sender Email
+- Recipient Email
+- Subject (from Prepare Email)
+- Thread ID (from Gmail)
+- Message ID (from Gmail)
+- Tracking ID (from Prepare Email)
+- Sequence (dropdown - loads from your InboxPlus account)
 
-```
-POST https://api/for/fetching/template
-```
-
-### **Load Sequences**
-
-```
-POST https://api/for/fetching/sequences
-```
-
-### **Send Email / Trigger Sequence**
-
-```
-POST https://api/for/starting/sequences
-```
-
----
-
-## 📘 Example Workflow
-
-**Gmail Trigger → InboxPlus Node → CRM**
-
-When a new email is received:
-
-* Extracts sender email
-* Generates tracking ID
-* Sends InboxPlus template
-* Triggers sequence
-* Returns tracking data (ID + image URL)
-
-Output:
-
+**Output:**
 ```json
 {
   "success": true,
-  "contactEmail": "example@gmail.com",
-  "trackingId": "abc123-xyz",
-  "trackingImage": "https://base-url/.../tracking-image/abc123",
-  "templateSent": {
-    "code": 200,
-    "success": 1
-  },
-  "sequenceTriggered": {
-    "code": 200,
-    "success": 1
-  }
+  "sequenceId": "uuid",
+  "recipientEmail": "contact@example.com",
+  "apiResponse": { "code": 200, "success": 1 }
 }
 ```
 
----
-
-## 🛠 Development
-
-Watch mode:
+## Workflow Example
 
 ```
-pnpm dev
+[Trigger]
+    ↓
+[InboxPlus: Prepare Email]
+  - Recipient: contact@example.com
+  - Template: "Welcome Email"
+    ↓
+[Gmail: Send Message]
+  - To: {{ $json.recipientEmail }}
+  - Subject: {{ $json.subject }}
+  - Body HTML: {{ $json.gmailBodyHtml }}
+    ↓
+[InboxPlus: Start Sequence]
+  - Sender: you@example.com
+  - Recipient: {{ $("InboxPlus").item.json.recipientEmail }}
+  - Subject: {{ $("InboxPlus").item.json.subject }}
+  - Thread ID: {{ $("Gmail").item.json.threadId }}
+  - Message ID: {{ $("Gmail").item.json.id }}
+  - Tracking ID: {{ $("InboxPlus").item.json.trackingId }}
+  - Sequence: "Onboarding Sequence"
 ```
 
-Lint:
+## How It Works
 
-```
-pnpm lint
-pnpm lint:fix
-```
+1. **Prepare Email** - Fetches template from InboxPlus and generates tracking pixel
+2. **Gmail** - Sends the email (Day 0) with template content and tracking
+3. **Start Sequence** - Records email in InboxPlus and starts automated follow-ups
 
-Release:
+InboxPlus then:
+- Monitors the email thread for replies
+- Sends Day 1, Day 2, etc. follow-ups automatically
+- Stops sequence if recipient replies
+- Tracks opens and clicks
 
-```
-pnpm release
-```
+## Field Mapping
 
----
+### From Prepare Email to Gmail:
+- `recipientEmail` → Gmail "To"
+- `subject` → Gmail "Subject"
+- `gmailBodyHtml` → Gmail "Body HTML"
 
-## 🔐 Environment Variables
+### From Prepare Email to Start Sequence:
+- `recipientEmail` → "Recipient Email"
+- `subject` → "Subject"
+- `trackingId` → "Tracking ID"
 
-None required — API Key is stored inside n8n Credentials.
+### From Gmail to Start Sequence:
+- `threadId` → "Thread ID"
+- `id` → "Message ID"
 
----
+## Important Notes
 
-## 🤝 Contributing
+- **Gmail is required** - InboxPlus works WITH Gmail, not as a replacement
+- **Day 0 sent by Gmail** - The first email is sent via Gmail node
+- **Follow-ups by InboxPlus** - Automated follow-ups are sent by InboxPlus
+- **Tracking included** - Tracking pixel is automatically added to emails
+- **Reply detection** - InboxPlus monitors for replies and stops sequences
 
-Pull requests are welcome!
+## API Endpoints Used
 
----
+- `POST /user-emails/n8n/get-email-templates` - Load templates
+- `POST /user-emails/n8n/get-sequences` - Load sequences
+- `POST /user-emails/n8n/tracking-id` - Generate tracking
+- `POST /user-emails/n8n` - Record email and start sequence
 
+## Troubleshooting
 
----
+### Templates not loading
+- Check API key is correct
+- Verify templates exist in InboxPlus dashboard
 
+### Sequence not starting
+- Ensure all fields are mapped correctly
+- Check API response in node output
+- Verify sequence exists and is active
+
+### Follow-ups not sending
+- Wait for the configured delay (e.g., 24 hours for Day 1)
+- Check sequence is active in InboxPlus dashboard
+- Verify Gmail is connected in InboxPlus settings
+
+## Version
+
+Current version: 0.2.0
+
+## Author
+
+Jay Gemawat
+- Email: jayg.itechnotion@gmail.com
+- GitHub: [@itechnotion-jay](https://github.com/itechnotion-jay)
+
+## License
+
+MIT
