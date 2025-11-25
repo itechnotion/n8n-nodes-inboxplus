@@ -72,7 +72,7 @@ export class InboxPlus implements INodeType {
 						action: 'Start a sequence',
 					},
 				],
-				default: 'sendEmail',
+				default: 'prepareEmail',
 			},
 
 			// ========== PREPARE EMAIL FIELDS ==========
@@ -160,7 +160,7 @@ export class InboxPlus implements INodeType {
 				},
 				required: true,
 				default: '',
-				placeholder: 'thread-id',
+				placeholder: 'thread-ID',
 				description: 'Gmail thread ID from Gmail node',
 			},
 			{
@@ -174,7 +174,7 @@ export class InboxPlus implements INodeType {
 				},
 				required: true,
 				default: '',
-				placeholder: 'message-id',
+				placeholder: 'message-ID',
 				description: 'Gmail message ID from Gmail node',
 			},
 			{
@@ -188,7 +188,7 @@ export class InboxPlus implements INodeType {
 				},
 				required: true,
 				default: '',
-				placeholder: 'tracking-id',
+				placeholder: 'tracking-ID',
 				description: 'Tracking ID from Prepare Email node',
 			},
 			{
