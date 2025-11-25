@@ -46,10 +46,7 @@
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": [
-      {
-        "name": "inboxPlusApi",
-        "required": true
-      }
+      "dist/credentials/InboxPlusApi.credentials.js"
     ],
     "nodes": [
       "dist/nodes/InboxPlus/InboxPlus.node.js"
