@@ -1,6 +1,6 @@
 {
   "name": "@itechnotion-jay/n8n-nodes-inboxplus",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "description": "InboxPlus integration for n8n - unified node for sending emails and managing sequences",
   "license": "MIT",
   "type": "commonjs",
@@ -37,13 +37,19 @@
     "prepublishOnly": "n8n-node prerelease"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE",
+    "credentials.example.json"
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "strict": true,
     "credentials": [
-      "dist/credentials/InboxPlusApi.credentials.js"
+      {
+        "name": "inboxPlusApi",
+        "required": true
+      }
     ],
     "nodes": [
       "dist/nodes/InboxPlus/InboxPlus.node.js"
