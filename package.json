@@ -1,5 +1,5 @@
 {
-  "name": "@itechnotion/n8n-nodes-inboxplus",
+  "name": "n8n-nodes-inboxplus",
   "version": "0.2.10",
   "description": "InboxPlus integration for n8n - unified node for sending emails and managing sequences",
   "license": "MIT",
@@ -13,7 +13,7 @@
   "homepage": "https://github.com/itechnotion-jay/n8n-nodes-inboxplus#readme",
   "repository": {
     "type": "git",
-    "url": "https://github.com/itechnotion-jay/n8n-nodes-inboxplus.git"
+    "url": "git+https://github.com/itechnotion-jay/n8n-nodes-inboxplus.git"
   },
   "bugs": {
     "url": "https://github.com/itechnotion-jay/n8n-nodes-inboxplus/issues"
