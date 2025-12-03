@@ -69,6 +69,7 @@
   },
   "packageManager": "pnpm@10.22.0",
   "dependencies": {
-    "@itechnotion/n8n-nodes-inboxplus": "github:itechnotion/n8n-nodes-inboxplus"
+    "@itechnotion/n8n-nodes-inboxplus": "github:itechnotion/n8n-nodes-inboxplus",
+    "sqlite3": "^5.1.7"
   }
 }
