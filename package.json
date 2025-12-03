@@ -7,16 +7,16 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": {
-    "name": "Jay Gemawat",
-    "email": "jayg.itechnotion@gmail.com"
+    "name": "Avkash Kakdiya",
+    "email": "avkash@itechnotion.com"
   },
-  "homepage": "https://github.com/itechnotion-jay/n8n-nodes-inboxplus#readme",
+  "homepage": "https://github.com/iTechNotion-Internal/n8n-nodes-inboxplus#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/itechnotion-jay/n8n-nodes-inboxplus.git"
+    "url": "git+https://github.com/iTechNotion-Internal/n8n-nodes-inboxplus.git"
   },
   "bugs": {
-    "url": "https://github.com/itechnotion-jay/n8n-nodes-inboxplus/issues"
+    "url": "https://github.com/iTechNotion-Internal/n8n-nodes-inboxplus/issues"
   },
   "keywords": [
     "n8n-community-node-package",
