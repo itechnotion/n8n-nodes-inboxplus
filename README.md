@@ -164,9 +164,9 @@ Current version: 0.2.0
 
 ## Author
 
-Jay Gemawat
-- Email: jayg.itechnotion@gmail.com
-- GitHub: [@itechnotion-jay](https://github.com/itechnotion-jay)
+Avkash Kakdiya
+- Email: avkash@itechnotion.com
+
 
 ## License
 
