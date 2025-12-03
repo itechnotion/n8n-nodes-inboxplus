@@ -166,7 +166,7 @@ Current version: 0.2.0
 
 Avkash Kakdiya
 - Email: avkash@itechnotion.com
-
+- Github: https://github.com/itechnotion
 
 ## License
 
