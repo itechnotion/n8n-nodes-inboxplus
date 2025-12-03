@@ -1,22 +1,22 @@
 {
   "name": "n8n-nodes-inboxplus",
   "version": "1.0.0",
-  "description": "InboxPlus integration for n8n - unified node for sending emails and managing sequences",
+  "description": "InboxPlus integration for n8n - node for sending emails and managing sequences",
   "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": {
-    "name": "Avkash Kakdiya",
-    "email": "avkash@itechnotion.com"
+    "name": "itechnotion",
+    "email": "dev@itechnotion.com"
   },
-  "homepage": "https://github.com/iTechNotion-Internal/n8n-nodes-inboxplus#readme",
+  "homepage": "https://github.com/itechnotion/n8n-nodes-inboxplus#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/iTechNotion-Internal/n8n-nodes-inboxplus.git"
+    "url": "git+https://github.com/itechnotion/n8n-nodes-inboxplus.git"
   },
   "bugs": {
-    "url": "https://github.com/iTechNotion-Internal/n8n-nodes-inboxplus/issues"
+    "url": "https://github.com/itechnotion/n8n-nodes-inboxplus/issues"
   },
   "keywords": [
     "n8n-community-node-package",
