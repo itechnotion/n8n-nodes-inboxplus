@@ -1,14 +1,14 @@
 {
   "name": "n8n-nodes-inboxplus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "InboxPlus integration for n8n - node for sending emails and managing sequences",
   "license": "MIT",
   "type": "commonjs",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "author": {
-    "name": "itechnotion",
-    "email": "dev@itechnotion.com"
+    "name": "Avkash Kakdia",
+    "email": "avkash@itechnotion.com"
   },
   "homepage": "https://github.com/itechnotion/n8n-nodes-inboxplus#readme",
   "repository": {
