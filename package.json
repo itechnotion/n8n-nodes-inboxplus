@@ -39,8 +39,7 @@
   "files": [
     "dist",
     "README.md",
-    "LICENSE",
-    "credentials.example.json"
+    "LICENSE"
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
@@ -67,9 +66,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "packageManager": "pnpm@10.22.0",
-  "dependencies": {
-    "@itechnotion/n8n-nodes-inboxplus": "github:itechnotion/n8n-nodes-inboxplus",
-    "sqlite3": "^5.1.7"
-  }
+  "packageManager": "pnpm@10.22.0"
 }

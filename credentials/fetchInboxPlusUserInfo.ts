@@ -26,7 +26,7 @@ export async function fetchInboxPlusUserInfo(
 
 	const resp = await context.helpers.httpRequest({
 		method: 'POST',
-		baseURL: 'https://dev-api.inboxpl.us',
+		baseURL: 'https://api.inboxpl.us',
 		url: '/auth/get-user-info',
 		headers: { api_key: apiKey },
 		json: true,

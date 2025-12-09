@@ -2,35 +2,45 @@ import type {
 	ICredentialType,
 	INodeProperties,
 	ICredentialTestRequest,
+	IAuthenticateGeneric,
 } from 'n8n-workflow';
 
 export class InboxPlusApi implements ICredentialType {
 	name = 'inboxPlusApi';
 	displayName = 'InboxPlus API';
-	documentationUrl = 'https://github.com/itechnotion-jay/n8n-nodes-inboxplus';
+	documentationUrl = 'https://github.com/itechnotion/n8n-nodes-inboxplus';
 
 	icon = 'file:logo.svg' as const;
+
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
+		properties: {
+			headers: {
+				'Content-Type': 'application/json',
+				api_key: '={{$credentials.apiKey}}',
+			},
+		},
+	};
 
 	test: ICredentialTestRequest = {
 		request: {
 			method: 'POST',
-			baseURL: 'https://dev-api.inboxpl.us',
+			baseURL: 'https://api.inboxpl.us',
 			url: '/user-emails/n8n/get-email-templates',
-			headers: {
-				api_key: '={{$credentials.apiKey}}',
-			},
-			json: true,
 		},
 	};
 
 	properties: INodeProperties[] = [
 		{
-			displayName: 'InboxPlus API Key',
+			displayName: 'API Key',
 			name: 'apiKey',
 			type: 'string',
 			default: '',
 			required: true,
-			typeOptions: { password: true },
+			typeOptions: {
+				password: true,
+			},
+			description: 'Your InboxPlus API Key',
 		},
 	];
 }
