@@ -1,6 +1,6 @@
 {
   "name": "@itechnotion/n8n-nodes-inboxplus",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "InboxPlus integration for n8n - node for sending emails and managing sequences",
   "license": "MIT",
   "type": "commonjs",
