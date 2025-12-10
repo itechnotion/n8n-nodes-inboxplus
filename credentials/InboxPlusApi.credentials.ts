@@ -10,7 +10,7 @@ export class InboxPlusApi implements ICredentialType {
 	displayName = 'InboxPlus API';
 	documentationUrl = 'https://github.com/itechnotion/n8n-nodes-inboxplus';
 
-	icon = 'file:logo.svg' as const;
+	icon = 'file:../nodes/InboxPlus/logo.svg' as const;
 
 	authenticate: IAuthenticateGeneric = {
 		type: 'generic',
