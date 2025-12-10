@@ -8,7 +8,7 @@ import type {
 	IDataObject,
 } from 'n8n-workflow';
 
-import { NodeOperationError } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 /** Template interface */
 interface InboxPlusTemplate {
@@ -42,8 +42,8 @@ export class InboxPlus implements INodeType {
 			dark: 'file:logo.dark.svg',
 		},
 
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 
 		credentials: [
 			{
@@ -53,6 +53,18 @@ export class InboxPlus implements INodeType {
 		],
 
 		properties: [
+			{
+				displayName: 'Resource',
+				name: 'resource',
+				type: 'hidden',
+				default: 'email',
+				options: [
+					{
+						name: 'Email',
+						value: 'email',
+					},
+				],
+			},
 			{
 				displayName: 'Operation',
 				name: 'operation',
@@ -212,16 +224,10 @@ export class InboxPlus implements INodeType {
 	methods = {
 		loadOptions: {
 			async getTemplates(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const credentials = await this.getCredentials('inboxPlusApi');
-
-				const resp = await this.helpers.httpRequest({
+				const resp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
 					method: 'POST',
 					baseURL: 'https://api.inboxpl.us',
 					url: '/user-emails/n8n/get-email-templates',
-					headers: {
-						'Content-Type': 'application/json',
-						api_key: credentials.apiKey as string,
-					},
 					json: true,
 				});
 
@@ -234,16 +240,10 @@ export class InboxPlus implements INodeType {
 			},
 
 			async getSequences(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
-				const credentials = await this.getCredentials('inboxPlusApi');
-
-				const resp = await this.helpers.httpRequest({
+				const resp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
 					method: 'POST',
 					baseURL: 'https://api.inboxpl.us',
 					url: '/user-emails/n8n/get-sequences',
-					headers: {
-						'Content-Type': 'application/json',
-						api_key: credentials.apiKey as string,
-					},
 					json: true,
 				});
 

@@ -1,6 +1,6 @@
 /* credentials/fetchInboxPlusUserInfo.ts
    Helper to fetch InboxPlus user info (email etc.) using the node/credential http helper.
-   This file does NOT use axios or other external libs (uses context.helpers.httpRequest).
+   This file uses httpRequestWithAuthentication for proper credential handling.
 */
 
 import type { IExecuteFunctions, ILoadOptionsFunctions } from 'n8n-workflow';
@@ -13,22 +13,17 @@ export interface InboxPlusUserInfo {
 }
 
 /**
- * Fetch InboxPlus user info (the response returns 'body' with user data).
+ * Fetch InboxPlus user info using the node/credential http helper.
  * context must be either an IExecuteFunctions or ILoadOptionsFunctions instance.
  */
 export async function fetchInboxPlusUserInfo(
 	context: IExecuteFunctions | ILoadOptionsFunctions,
-	apiKey: string,
 ): Promise<InboxPlusUserInfo> {
-	if (!apiKey) {
-		throw new Error('API key is required for fetchInboxPlusUserInfo');
-	}
-
-	const resp = await context.helpers.httpRequest({
+	// Use the httpRequestWithAuthentication helper so the API key from the credential is used
+	const resp = await context.helpers.httpRequestWithAuthentication.call(context, 'inboxPlusApi', {
 		method: 'POST',
 		baseURL: 'https://api.inboxpl.us',
 		url: '/auth/get-user-info',
-		headers: { api_key: apiKey },
 		json: true,
 	});
 

@@ -26,7 +26,7 @@ Then restart your n8n instance or link in your n8n custom nodes directory.
 
 You need an InboxPlus API key (JWT token) from your InboxPlus account.
 
-1. Go to InboxPlus Dashboard → Settings → API
+1. Go to InboxPlus Profile → Manage API → Generate API
 2. Copy your API key
 3. In n8n: Credentials → Add → InboxPlus API
 4. Paste your API key
