@@ -8,7 +8,7 @@ import type {
 export class InboxPlusApi implements ICredentialType {
 	name = 'inboxPlusApi';
 	displayName = 'InboxPlus API';
-	documentationUrl = 'https://github.com/itechnotion/n8n-nodes-inboxplus';
+	documentationUrl = 'https://app.inboxpl.us/account/';
 
 	icon = 'file:../nodes/InboxPlus/logo.svg' as const;
 
@@ -40,7 +40,7 @@ export class InboxPlusApi implements ICredentialType {
 			typeOptions: {
 				password: true,
 			},
-			description: 'Your InboxPlus API Key',
+			description: 'To get your InboxPlus account API key please <a href="https://app.inboxpl.us/account/" target="_blank">click here to create your account</a>',
 		},
 	];
 }
