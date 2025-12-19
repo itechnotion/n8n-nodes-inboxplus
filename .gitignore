@@ -6,13 +6,14 @@ dist/
 .env
 .DS_Store
 npm-debug.log*
-pnpm-lock.yaml
-dist/
 *.ico
 *.log
-node_modules/
+.github/
+examples/
+.npmrcodules/
 .DS_Store
 .github/
 examples/
 .gitignore
 .npmrc
+pnpm-lock.yaml

@@ -160,7 +160,7 @@ InboxPlus then:
 
 ## Version
 
-Current version: 0.2.0
+Current version: 1.1.2
 
 ## Author
 
