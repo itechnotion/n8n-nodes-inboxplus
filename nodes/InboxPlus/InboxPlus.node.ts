@@ -72,16 +72,16 @@ export class InboxPlus implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
-						name: 'Prepare Email',
+						name: 'Select Template',
 						value: 'prepareEmail',
 						description: 'Load template and generate tracking for Gmail',
-						action: 'Prepare an email',
+						action: 'Select a template',
 					},
 					{
-						name: 'Start Sequence',
+						name: 'Attach Sequence',
 						value: 'startSequence',
 						description: 'Record sent email and start automated follow-up sequence',
-						action: 'Start a sequence',
+						action: 'Attach a sequence',
 					},
 				],
 				default: 'prepareEmail',
