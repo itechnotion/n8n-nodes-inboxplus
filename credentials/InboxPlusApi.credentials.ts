@@ -26,7 +26,7 @@ export class InboxPlusApi implements ICredentialType {
 		request: {
 			method: 'POST',
 			baseURL: 'https://api.inboxpl.us',
-			url: '/user-emails/n8n/get-email-templates',
+			url: '/user-emails/api/get-user-info',
 		},
 	};
 

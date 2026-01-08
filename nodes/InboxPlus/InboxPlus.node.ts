@@ -10,6 +10,15 @@ import type {
 
 import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
+// Simple UUID v4 generator (no external dependencies)
+function generateUUID(): string {
+	return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+		const r = (Math.random() * 16) | 0;
+		const v = c === 'x' ? r : (r & 0x3) | 0x8;
+		return v.toString(16);
+	});
+}
+
 /** Template interface */
 interface InboxPlusTemplate {
 	id?: string;
@@ -224,14 +233,17 @@ export class InboxPlus implements INodeType {
 	methods = {
 		loadOptions: {
 			async getTemplates(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				// Use new API-key compatible endpoint
 				const resp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
 					method: 'POST',
 					baseURL: 'https://api.inboxpl.us',
-					url: '/user-emails/n8n/get-email-templates',
+					url: '/user-emails/api/get-user-info',
 					json: true,
 				});
 
-				const list = (resp.templates as InboxPlusTemplate[]) || [];
+				// Extract templates from user info response
+				const userInfo = resp.body || resp;
+				const list = (userInfo.templates as InboxPlusTemplate[]) || [];
 
 				return list.map((t) => ({
 					name: t.template_name || 'Untitled Template',
@@ -240,14 +252,17 @@ export class InboxPlus implements INodeType {
 			},
 
 			async getSequences(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				// Use new API-key compatible endpoint
 				const resp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
 					method: 'POST',
 					baseURL: 'https://api.inboxpl.us',
-					url: '/user-emails/n8n/get-sequences',
+					url: '/user-emails/api/get-user-info',
 					json: true,
 				});
 
-				const list = (resp.sequences as InboxPlusSequence[]) || [];
+				// Extract sequences from user info response
+				const userInfo = resp.body || resp;
+				const list = (userInfo.sequences as InboxPlusSequence[]) || [];
 
 				return list.map((s) => ({
 					name: s.sequence_name || 'Untitled Sequence',
@@ -271,26 +286,20 @@ export class InboxPlus implements INodeType {
 					const recipientEmail = this.getNodeParameter('recipientEmail', i) as string;
 					const templateId = this.getNodeParameter('templateId', i) as string;
 
-					// Generate tracking ID
-					const trackResp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
+					// Generate tracking ID (like extension does)
+					const trackingId = generateUUID();
+					const trackingImage = `<img src="https://api.inboxpl.us/track/${trackingId}&&&" style="display: none; width: 1px; height: 1px;">`;
+
+					// Fetch user info which includes templates (using API-key compatible endpoint)
+					const userInfoResp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
 						method: 'POST',
 						baseURL: 'https://api.inboxpl.us',
-						url: '/user-emails/n8n/tracking-id',
+						url: '/user-emails/api/get-user-info',
 						json: true,
 					});
 
-					const trackingId = trackResp.trackingId;
-					const trackingImage = trackResp.trackingImage;
-
-					// Fetch template
-					const templateResp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
-						method: 'POST',
-						baseURL: 'https://api.inboxpl.us',
-						url: '/user-emails/n8n/get-email-templates',
-						json: true,
-					});
-
-					const templates = (templateResp.templates as InboxPlusTemplate[]) || [];
+					const userInfo = userInfoResp.body || userInfoResp;
+					const templates = (userInfo.templates as InboxPlusTemplate[]) || [];
 					const template = templates.find((t) => [t.id, t._id].includes(templateId));
 
 					if (!template) {
@@ -311,6 +320,7 @@ export class InboxPlus implements INodeType {
 							subject: template.subject,
 							body: template.body,
 							gmailBodyHtml,
+							organizationId: userInfo.organization_id, // Include org ID for next step
 						},
 						pairedItem: { item: i },
 					});
@@ -334,22 +344,38 @@ export class InboxPlus implements INodeType {
 						);
 					}
 
-					// Build payload
+					// Get organization ID from user info (using API-key compatible endpoint)
+					const userInfoResp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
+						method: 'POST',
+						baseURL: 'https://api.inboxpl.us',
+						url: '/user-emails/api/get-user-info',
+						json: true,
+					});
+
+					const userInfo = userInfoResp.body || userInfoResp;
+					const organizationId = userInfo.organization_id;
+
+					if (!organizationId) {
+						throw new NodeOperationError(this.getNode(), 'Unable to get organization ID from user info');
+					}
+
+					// Build payload matching extension format
 					const payload: IDataObject = {
-						recipient_email: recipientEmail,
 						sender_email: senderEmail,
-						subject,
-						threadId,
+						recipient_email: recipientEmail,
 						message_id: messageId,
+						subject: subject,
+						sequence_id: sequenceId,
+						organization_id: organizationId,
 						tracking_id: trackingId,
-						sequenceId,
+						ourNewThreadId: threadId,
 					};
 
-					// Call API to start sequence
+					// Call API-key compatible endpoint to save email data
 					const resp = await this.helpers.httpRequestWithAuthentication.call(this, 'inboxPlusApi', {
 						method: 'POST',
 						baseURL: 'https://api.inboxpl.us',
-						url: '/user-emails/n8n',
+						url: '/user-emails/api/create',
 						body: payload,
 						json: true,
 					});
@@ -365,6 +391,7 @@ export class InboxPlus implements INodeType {
 							threadId,
 							messageId,
 							trackingId,
+							organizationId,
 							apiResponse: resp,
 						},
 						pairedItem: { item: i },

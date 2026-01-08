@@ -33,7 +33,7 @@ You need an InboxPlus API key (JWT token) from your InboxPlus account.
 
 ## Operations
 
-### 1. Prepare Email
+### 1) Select template
 
 Loads an InboxPlus template and generates tracking.
 
@@ -52,7 +52,7 @@ Loads an InboxPlus template and generates tracking.
 }
 ```
 
-### 2. Start Sequence
+### 2) Attach Sequence
 
 Records the sent email in InboxPlus and starts automated follow-up sequence.
 
@@ -80,7 +80,7 @@ Records the sent email in InboxPlus and starts automated follow-up sequence.
 ```
 [Trigger]
     ↓
-[InboxPlus: Prepare Email]
+[InboxPlus: 1) Select template]
   - Recipient: contact@example.com
   - Template: "Welcome Email"
     ↓
@@ -89,7 +89,7 @@ Records the sent email in InboxPlus and starts automated follow-up sequence.
   - Subject: {{ $json.subject }}
   - Body HTML: {{ $json.gmailBodyHtml }}
     ↓
-[InboxPlus: Start Sequence]
+[InboxPlus: 2) Attach Sequence]
   - Sender: you@example.com
   - Recipient: {{ $("InboxPlus").item.json.recipientEmail }}
   - Subject: {{ $("InboxPlus").item.json.subject }}
@@ -101,9 +101,9 @@ Records the sent email in InboxPlus and starts automated follow-up sequence.
 
 ## How It Works
 
-1. **Prepare Email** - Fetches template from InboxPlus and generates tracking pixel
+1. **1) Select template** - Fetches template from InboxPlus and generates tracking pixel
 2. **Gmail** - Sends the email (Day 0) with template content and tracking
-3. **Start Sequence** - Records email in InboxPlus and starts automated follow-ups
+3. **2) Attach Sequence** - Records email in InboxPlus and starts automated follow-ups
 
 InboxPlus then:
 - Monitors the email thread for replies
@@ -113,17 +113,17 @@ InboxPlus then:
 
 ## Field Mapping
 
-### From Prepare Email to Gmail:
+### From 1) Select template to Gmail:
 - `recipientEmail` → Gmail "To"
 - `subject` → Gmail "Subject"
 - `gmailBodyHtml` → Gmail "Body HTML"
 
-### From Prepare Email to Start Sequence:
+### From 1) Select template to 2) Attach Sequence:
 - `recipientEmail` → "Recipient Email"
 - `subject` → "Subject"
 - `trackingId` → "Tracking ID"
 
-### From Gmail to Start Sequence:
+### From Gmail to 2) Attach Sequence:
 - `threadId` → "Thread ID"
 - `id` → "Message ID"
 
@@ -160,7 +160,7 @@ InboxPlus then:
 
 ## Version
 
-Current version: 1.1.2
+Current version: 1.2.0
 
 ## Author
 
